@@ -9,7 +9,6 @@
 typedef struct{
 		int id;
 		char * query;
-		char *info;
 } query;
 
 typedef struct{

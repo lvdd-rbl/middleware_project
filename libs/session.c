@@ -27,8 +27,6 @@ void assignResources(socketInfo_t * sockInfo, int listenSocket, void (*queryHand
   }
 }
 
-
-
 /**
 	\fn void bindAddress(int socket, struct sockaddr_in * sockAddr)
 	\param socket --> le numéro de la socket
@@ -39,7 +37,6 @@ void assignResources(socketInfo_t * sockInfo, int listenSocket, void (*queryHand
 void bindAddress(int *socket, struct sockaddr_in sockAddr){
 	CHECK(bind(*socket, (struct sockaddr *) &sockAddr, sizeof(sockAddr)), "Impossible de bind la socket d'écoute");
 }
-
 
 /**
   \fn void computeAddress(struct sockaddr_in * addr, char * address)
@@ -52,9 +49,9 @@ void computeAddress(struct sockaddr_in * addr, char * address){
 	if(address != NULL){
 		int port;
 		char ipAddress[20];
-		printf("%s\n", address);
+		// printf("%s\n", address);
 		sscanf(address, "%[^:]:%i", ipAddress, &port);
-		printf("SOCKET : [PORT = %i] | [IP = %s]\n",port, ipAddress);
+		// printf("SOCKET : [PORT = %i] | [IP = %s]\n",port, ipAddress);
 		addr->sin_family = PF_INET;
 		addr->sin_port = htons(port);
 		addr->sin_addr.s_addr = inet_addr(ipAddress);
@@ -74,7 +71,7 @@ void connectToServer(int s, char * address){
     case SOCK_STREAM :{
 		struct sockaddr_in sockAddr;
 		computeAddress(&sockAddr, address);
-		printf("Connecté à %s, port : %d\n", inet_ntoa(sockAddr.sin_addr), ntohs(sockAddr.sin_port));
+		// printf("Connecté à %s, port : %d\n", inet_ntoa(sockAddr.sin_addr), ntohs(sockAddr.sin_port));
 		CHECK(connect(s, (struct sockaddr *) &sockAddr, sizeof(sockAddr)), "Impossible pour le client de se connecter au serveur");
 		break;
 	}
@@ -83,7 +80,6 @@ void connectToServer(int s, char * address){
       break;
   }
 }
-
 
 /**
 	\fn void deroute(int numSignal)
@@ -96,27 +92,39 @@ void deroute(int numSignal){
   int status;
   switch(numSignal){
     case SIGCHLD: CHECK(pidFilsFini = wait(&status), "Problem while waiting");
-    if(WIFEXITED(status))
-      printf("Fin du fils [PID=%i] --> Exit avec [STATUS=%i]\n", getpid(), status);
-    if(WIFSIGNALED(status))
-      printf("Fin du fils [PID=%i] --> SIGNAL avec [STATUS=%i]\n", getpid(), status);
+      if(WIFEXITED(status))
+        printf("Fin du fils [PID=%i] --> Exit avec [STATUS=%i]\n", getpid(), status);
+      if(WTERMSIG(status))
+        printf("Fin du fils [PID=%i] --> SIGNAL avec [STATUS=%i]\n", getpid(), status);
+      break;
+
+    case SIGALRM : 
+      timer = 0;
+      timerAnswer = 0;
+      break;
+
+    case SIGWINCH : 
+
+      break;
   }
 }
 
 /**
-	\fn void finishChildren(void)
-	\brief Fonction permettant au processus en question de pouvoir bloquer et traiter le signal SIGCHLD
+	\fn void initSignaux(void)
+	\brief Fonction permettant au processus en question de pouvoir bloquer
+    et traiter les différents signaux
 	\return void
 */
-void finishChildren(void){
+void initSignaux(void){
    struct sigaction newAct;
    newAct.sa_handler = deroute;
-   newAct.sa_flags = SA_RESTART;
+   newAct.sa_flags = 0;
    CHECK(sigemptyset(&newAct.sa_mask), "Erreur lors du nettoyage du mask");
    CHECK(sigaction(SIGUSR1, &newAct, NULL), "Erreur lors de la mise en place du déroutement de signal");
    CHECK(sigaction(SIGCHLD, &newAct, NULL), "Erreur lors de la mise en place du déroutement de signal");
+   CHECK(sigaction(SIGALRM, &newAct, NULL), "Erreur lors de la mise en place du déroutement de signal");
+   CHECK(sigaction(SIGWINCH, &newAct, NULL), "Erreur lors de la mise en place du déroutement de signal");
 }
-
 
 /**
 	\fn int getSockAddr(int s, struct sockaddr_in * sockAddr)
@@ -175,13 +183,12 @@ int receiveDatas(query * query, socketInfo_t * sockInfo, int stream){
       CHECK(recvfrom(stream, buffer, BUFFER_SIZE, 0, (struct sockaddr *) &(sockInfo->clt), &cltLen), "Impossible de lire les données");
       break;
     case SOCK_STREAM :
-      CHECK(nb = read(stream, buffer, sizeof(buffer) - 1), "Impossible de lire les données");
+        CHECK(nb = read(stream, buffer, sizeof(buffer) - 1), "Impossible de lire les données");
       break;
   }
   *query = stringToQuery(buffer);
   return nb;
 }
-
 
 /**
   \fn void socketInit(int *s, int type, char * address, int flag)
@@ -193,21 +200,33 @@ int receiveDatas(query * query, socketInfo_t * sockInfo, int stream){
   \return void
 */
 void socketInit(int *s, int type, char * address, int flag){
-  CHECK(*s = socket(PF_INET, type, 0), "Impossible de créer une socket");
+  CHECK(*s = socket(AF_INET, type, 0), "Impossible de créer une socket");
+
+  // Temp code /////////
+  struct linger {
+                      int l_onoff;    /* linger active */
+                      int l_linger;   /* how many seconds to linger for */
+                  };
+  struct linger lin;
+  lin.l_onoff = 0;
+  lin.l_linger = 0;
+  setsockopt(*s, SOL_SOCKET, SO_LINGER, (const char *)&lin, sizeof(int));
+  if (setsockopt(*s, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int)) < 0)
+    error("setsockopt(SO_REUSEADDR) failed");
+  // Temp code ///////////
+
   if(address != NULL){
   	struct sockaddr_in sockAddr;
   	computeAddress(&sockAddr, address);
   	bindAddress(s, sockAddr);
 	if(flag > 0 && type == SOCK_STREAM){
   		listenMode(*s, flag);
-  		printf("Mise sur écoute\n");
+  		// printf("Mise sur écoute\n");
   	}
   } else {
-		printf("Pas de bind d'adresse\n");
+		// printf("Pas de bind d'adresse\n");
   }
 }
-
-
 
 /**
   void waitForClient(socketInfo_t * sockInfo, int listenSocket, void (*f)(socketInfo_t *))
@@ -219,6 +238,7 @@ void socketInit(int *s, int type, char * address, int flag){
 */
 void waitForClient(socketInfo_t * sockInfo, int listenSocket, void (*f)(socketInfo_t *)){
   int cltLen = sizeof(sockInfo->clt);
+  int sockNum;
   CHECK(sockInfo->s = accept(listenSocket, (struct sockaddr *) &(sockInfo->clt), &cltLen), "Erreur lors de la tentative de connexion");
   assignResources(sockInfo, listenSocket, f);
   CHECK(close(sockInfo->s), "Impossible de fermer la socket de dialogue");
@@ -232,7 +252,6 @@ void waitForClient(socketInfo_t * sockInfo, int listenSocket, void (*f)(socketIn
 	\brief Fonction permettant d'envoyer des données.
 	\return void
 */
-  //rep2str avec struct normalement
 void writeDatas(query * query, socketInfo_t * sockInfo, int s){
   char * answer = queryToString(query);
   switch(getSockType(s)){

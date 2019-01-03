@@ -10,10 +10,10 @@ include = -I./libs
 all : bin/client bin/server
 
 bin/client : $(clientObj)
-	$(CC) -o $@ $^ $(include)
+	$(CC) -o $@ $^ $(include) -lncurses -pthread
 	
 bin/server : $(serverObj)
-	$(CC) -o $@ $^ $(include)
+	$(CC) -o $@ $^ $(include) -lncurses -pthread
 
 .PHONY: clean
 
