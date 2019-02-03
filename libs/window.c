@@ -166,14 +166,11 @@ void initWindows() {
   \return int --> le choix de l'utilisateur
 */
 int printMenu() {
+	char choices[3][50] = {"Créer une partie","Rejoindre une partie","Quitter le jeu"};
 	int highlight = 1;
 	int choice = 0;
 	int c,y,x;
 	getmaxyx(game,y,x); // y et x sont la hauteur et la largeur de la fenêtre game
-	choices[0] = "Créer une partie";
-	choices[1] = "Rejoindre une partie";
-	choices[2] = "Quitter le jeu";
-
 	printOptions(game,highlight,choices,3,6);
 	wattrset(game,COLOR_PAIR(4) | A_BOLD);
 	mvwhline(game,13,2,ACS_HLINE,x-4);
@@ -234,7 +231,7 @@ int printMenu() {
   	A_REVERSE (Reverse video)
   \return void
 */
-void printOptions(WINDOW *win, int highlight, char *options[], int nOptions, int baseY) {
+void printOptions(WINDOW *win, int highlight, char options[4][50], int nOptions, int baseY) {
 	int x, y, baseX;
 	getmaxyx(win,y,x);	
 	// wborder(win, '|', '|', '-', '-', '+', '+', '+', '+');

@@ -6,9 +6,17 @@
 
 #define BUFFER_SIZE 1024
 
+typedef struct {
+	char question[200];
+	char options[4][50];
+	int answer;
+} question;
+
+
 typedef struct{
 		int id;
 		char * query;
+		question quest;
 } query;
 
 typedef struct{

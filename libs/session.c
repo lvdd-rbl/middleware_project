@@ -16,12 +16,11 @@
   \brief Fonction permettant d'assigner un processus fils à un client. Le processus fils exécutera la fonction passée en paramètre.
   \return void
 */
-void assignResources(socketInfo_t * sockInfo, int listenSocket, void (*queryHandler)(socketInfo_t *)){
+void assignResources(socketInfo_t * sockInfo, int listenSocket, void (*queryHandler)(socketInfo_t *, int)){
   pid_t pid;
   CHECK(pid = fork(), "Impossible d'assigner un processus au nouveau client");
   if(pid == 0){
-    CHECK(close(listenSocket), "Impossible de fermer la socket d'écoute");
-    queryHandler(sockInfo);
+    queryHandler(sockInfo, listenSocket);
     CHECK(close(sockInfo->s), "Impossible de fermer la socket de dialogue");
     exit(EXIT_SUCCESS);
   }
@@ -97,8 +96,15 @@ void deroute(int numSignal){
       if(WTERMSIG(status))
         printf("Fin du fils [PID=%i] --> SIGNAL avec [STATUS=%i]\n", getpid(), status);
       break;
+      
+    case SIGUSR1:
+    	serverCanAccept = 1;
+    	break;
 
     case SIGALRM : 
+    	if(serverMode == LOBBY_STATE){
+    		kill(getppid(), SIGUSR1); //Si on est dans le lobby on signal au père qu'il peut créer une nouvelle partie
+    	}
       timer = 0;
       timerAnswer = 0;
       break;
@@ -212,7 +218,7 @@ void socketInit(int *s, int type, char * address, int flag){
   lin.l_linger = 0;
   setsockopt(*s, SOL_SOCKET, SO_LINGER, (const char *)&lin, sizeof(int));
   if (setsockopt(*s, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int)) < 0)
-    error("setsockopt(SO_REUSEADDR) failed");
+    printf("setsockopt(SO_REUSEADDR) failed\n");
   // Temp code ///////////
 
   if(address != NULL){
@@ -236,7 +242,7 @@ void socketInit(int *s, int type, char * address, int flag){
   \brief Fonction permettant d'accepter un client, de lui assigner un processus fils, et d'appeler une fonction pour traiter ses demandes. Inutilisable si la connexion est de type DGRAM.
   \return void
 */
-void waitForClient(socketInfo_t * sockInfo, int listenSocket, void (*f)(socketInfo_t *)){
+void waitForClient(socketInfo_t * sockInfo, int listenSocket, void (*f)(socketInfo_t *, int)){
   int cltLen = sizeof(sockInfo->clt);
   int sockNum;
   CHECK(sockInfo->s = accept(listenSocket, (struct sockaddr *) &(sockInfo->clt), &cltLen), "Erreur lors de la tentative de connexion");
