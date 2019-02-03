@@ -77,13 +77,13 @@ int main(void) {
   	FD_SET(listenSocket,&fds);
 
   	// Un joueur initie une connexion
-  	nb = accept(listenSocket,
+  	CHECK(nb = accept(listenSocket,
   					(struct sockaddr *)&(sockInfo.clt), 
-  					&cltLen);
-  	if(nb<0) {
+  					&cltLen),"Problem first accept");
+  	/*if(nb<0) {
   		printf("Erreur first accept : %d\n",nb);
   		exit(0);
-  	}
+  	}*/
 
   	// Attente du choix et du pseudo du premier joueur
   	receiveDatas(&dataStructure,NULL,nb);
@@ -126,14 +126,14 @@ int main(void) {
 			  		// Envoi du pseudo du dernier joueur aux autres joueurs
 			  		for(int i = 0 ; i < nbUsers ; i++) {
 			  			writeDatas(&dataStructure,NULL,users[i].fd);
-			  			usleep(300); // nécessaire entre chaque écriture
+			  			//usleep(300); // nécessaire entre chaque écriture
 			  		}
 
 			  		// Envoi des pseudos des autres joueurs au dernier joueur
 			  		for(int i = 0 ; i < nbUsers ; i++) {
 			  			dataStructure.query = users[i].pseudo;
 			  			writeDatas(&dataStructure,NULL,users[nbUsers].fd);
-			  			usleep(300);
+			  			//usleep(300);
 			  		}
 
 			  		nbUsers++;
