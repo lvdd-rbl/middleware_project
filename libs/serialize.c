@@ -15,8 +15,8 @@
   \return char *
 */
 char * queryToString(query * q) {
-	char * buffer = malloc(sizeof(q->id) + strlen(q->query));
-	sprintf(buffer,"%i:%s",q->id,q->query);
+	char * buffer = malloc(sizeof(q->id) + strlen(q->query) + sizeof(q->quest));
+	sprintf(buffer,"%i:%s:%s:%s:%s:%s:%s:%i",q->id,q->query,q->quest.question,q->quest.options[0],q->quest.options[1],q->quest.options[2],q->quest.options[3],q->quest.answer);
 	return buffer;
 }
 
@@ -29,7 +29,7 @@ char * queryToString(query * q) {
 query stringToQuery(char * s) {
 	query query2;
   query2.query = malloc(BUFFER_SIZE);
-  sscanf(s,"%i:%[^\n]",&(query2.id),query2.query);
+  sscanf(s,"%i:%[^:]:%[^:]:%[^:]:%[^:]:%[^:]:%[^:]:%i\n",&(query2.id),query2.query,query2.quest.question, query2.quest.options[0], query2.quest.options[1], query2.quest.options[2], query2.quest.options[3], &(query2.quest.answer));
 	return query2;
 }
 

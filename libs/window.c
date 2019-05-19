@@ -166,14 +166,11 @@ void initWindows() {
   \return int --> le choix de l'utilisateur
 */
 int printMenu() {
+	char choices[3][50] = {"Créer une partie","Rejoindre une partie","Quitter le jeu"};
 	int highlight = 1;
 	int choice = 0;
 	int c,y,x;
 	getmaxyx(game,y,x); // y et x sont la hauteur et la largeur de la fenêtre game
-	choices[0] = "Créer une partie";
-	choices[1] = "Rejoindre une partie";
-	choices[2] = "Quitter le jeu";
-
 	printOptions(game,highlight,choices,3,6);
 	wattrset(game,COLOR_PAIR(4) | A_BOLD);
 	mvwhline(game,13,2,ACS_HLINE,x-4);
@@ -223,18 +220,18 @@ int printMenu() {
 }
 
 /**
-  \fn void printOptions(WINDOW *win, int highlight, char *options[], int nOptions, int baseY)
-  \param WINDOW *win --> la fenêtre sur laquelle les options seront affichées
-  \param int highlight --> le numéro de l'option à mettre en avant
-  \param char *options[] --> le tableau de chaînes de caractères à afficher dans les options
-  \param int nOptions --> le nombre d'options à afficher
-  \param int baseY --> la hauteur de départ où les options seront affichées
+  \fn void printOptions(WINDOW *win, int highlight, char options[4][50] , int nOptions, int baseY)
+  \param win --> la fenêtre sur laquelle les options seront affichées
+  \param highlight --> le numéro de l'option à mettre en avant
+  \param options --> le tableau de chaînes de caractères à afficher dans les options
+  \param nOptions --> le nombre d'options à afficher
+  \param baseY --> la hauteur de départ où les options seront affichées
   \brief Affiche les options passées en paramètre à partir d'une hauteur donnée
   	et met en avant l'option désignée par le paramètre highlight grâce à l'attribut
   	A_REVERSE (Reverse video)
   \return void
 */
-void printOptions(WINDOW *win, int highlight, char *options[], int nOptions, int baseY) {
+void printOptions(WINDOW *win, int highlight, char options[4][50], int nOptions, int baseY) {
 	int x, y, baseX;
 	getmaxyx(win,y,x);	
 	// wborder(win, '|', '|', '-', '-', '+', '+', '+', '+');
@@ -258,9 +255,9 @@ void printOptions(WINDOW *win, int highlight, char *options[], int nOptions, int
 
 /**
   \fn int printString(int y, int x, char *string)
-  \param int y --> la hauteur de la fenêtre
-  \param int x --> la largeur de la fenêtre
-  \param char *string --> la chaîne de caractères à afficher
+  \param y --> la hauteur de la fenêtre
+  \param x --> la largeur de la fenêtre
+  \param string --> la chaîne de caractères à afficher
   \brief Permet d'afficher une chaîne de caractères
   	comportant des retours chariot que Ncurses prend mal en charge
   	au milieu de la fenêtre game à partir de coordonnées données

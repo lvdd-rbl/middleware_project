@@ -1,0 +1,120 @@
+Quelle partie de l'adresse réseau un routeur|utilise-t-il pour transférer des paquets ? 
+La partie hôte
+L'adresse de diffusion
+La partie réseau
+L'adresse de passerelle
+3
+Quelle adresse permet une requête ping pour|l'interface de bouclage ? 
+126.0.0.1
+127.0.0.0
+0.0.0.0
+127.0.0.1
+4
+Quelle valeur, qui se trouve dans un champ|d'en-tête IPv4, est diminuée par chaque| routeur qui reçoit un paquet ? 
+Services différenciés
+Décalage du fragment
+Longueur d'en-tête
+Time To Live
+4
+Quelle technique de migration du réseau encapsule|les paquets IPv6 à l'intérieur des paquets IPv4|pour les transporter à travers les |infrastructures réseau IPv4 ? 
+Encapsulation
+Traduction
+Double pile
+Tunneling
+4
+Quel type d'adresse IPv6 n'est pas routable et|uniquement utilisé pour la communication|sur un seul sous-réseau ? 
+Adresse de monodiffusion globale
+Adresse link-local
+Adresse de bouclage
+Adresse locale unique
+2
+Quelle est la notation de longueur du préfixe|pour le masque de sous-réseau 255.255.255.224 ? 
+/25
+/26
+/27
+/28
+3
+En dehors de DHCPv6, dans quel autre type|d'adressage un routeur fournit-il dynamiquement|des informations de configuration IPv6 aux hôtes ? 
+ICMPv6
+EUI-64
+SLACK
+SLAAC
+4
+Un type de périphérique se voit généralement attribuer|une adresse IP statique. Lequel ? 
+Clients
+Serveurs Web
+Concentrateurs
+Imprimantes
+2
+Quelle méthode est utilisée pour gérer l'accès avec|gestion des conflits sur un réseau sans fil ? 
+CSMA/CD
+Classement des priorités
+CSMA/CA
+Passage de jeton
+3
+Quelle est la méthode qui permet d'envoyer et de|recevoir simultanément des informations ? 
+Bidirectionnel simultané
+Double pile
+Multiplexage
+Simplex
+1
+Dans quelle couche du modèle OSI, une adresse|physique est-elle encapsulée ? 
+Couche physique
+Couche liaison de données
+Couche réseau
+Couche transport
+2
+Quelle couche du modèle de protocole TCP/IP|détermine le meilleur chemin sur le réseau ? 
+Application
+Transport
+Internet
+Accès réseau
+3
+Quel type de message est envoyé à un|groupe d'hôtes spécifique ? 
+Monodiffusion
+WhatsApp
+Multidiffusion
+Diffusion
+3
+Quelle adresse logique est utilisée pour la transmission|des données à un réseau distant ? 
+Adresse MAC de destination
+Adresse IP de destination
+Adresse MAC source
+Adresse IP source
+2
+Quel est le terme générique utilisé pour décrire un|bloc de données d'un modèle de réseau ? 
+Trame
+Paquet
+Unité de données de protocole
+Segment
+3
+Quelle est la principale fonction du protocole ARP ? 
+Traduction des URL en adresses IP
+Résolution d'adresses IPv4 en adresses MAC
+Configuration IP dynamique
+Lecture d'un PDF
+2
+Le nombre binaire 0000 1010, |en hexadécimal, correspond à ? 
+0A
+42
+OC
+0000 1010
+1
+Quel est l'équivalent décimal de la |valeur hexadécimale 3F ? 
+18
+59
+62
+63
+4
+Sur les réseaux Ethernet, l'adresse hexédécimale |FF-FF-FF-FF-FF-FF représente l'adresse MAC ? 
+De monodiffusion
+De diffusion
+De multidiffusion
+D'un serveur de Google
+2
+Quelle partie de la trame Ethernet permet |de détecter les erreur ? 
+La partie CRC
+L'adresse MAC source
+L'adresse MAC de destination
+La réponse D
+1

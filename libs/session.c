@@ -9,26 +9,24 @@
 
 
 /**
-  \fn assignResources(socketInfo_t * sockInfo, int listenSocket, void (*queryHandler)(socketInfo_t *))
+  \fn assignResources(socketInfo_t * sockInfo, int listenSocket, void (*queryHandler)(socketInfo_t *, int))
   \param sockInfo --> la structure contenant des informations sur la socket qui sera utilisé
   \param listenSocket --> La socket d'écoute utilisée.
   \param queryHandler --> La fonction appelée pour traiter les requêtes clients
   \brief Fonction permettant d'assigner un processus fils à un client. Le processus fils exécutera la fonction passée en paramètre.
   \return void
 */
-void assignResources(socketInfo_t * sockInfo, int listenSocket, void (*queryHandler)(socketInfo_t *)){
+void assignResources(socketInfo_t * sockInfo, int listenSocket, void (*queryHandler)(socketInfo_t *, int)){
   pid_t pid;
   CHECK(pid = fork(), "Impossible d'assigner un processus au nouveau client");
   if(pid == 0){
-    CHECK(close(listenSocket), "Impossible de fermer la socket d'écoute");
-    queryHandler(sockInfo);
-    CHECK(close(sockInfo->s), "Impossible de fermer la socket de dialogue");
+    queryHandler(sockInfo, listenSocket);
     exit(EXIT_SUCCESS);
   }
 }
 
 /**
-	\fn void bindAddress(int socket, struct sockaddr_in * sockAddr)
+	\fn void bindAddress(int *socket, struct sockaddr_in  sockAddr)
 	\param socket --> le numéro de la socket
 	\param sockAddr --> la structure à utiliser pour bind l'adresse
 	\brief Fonction enveloppe pour l'appel système bind()
@@ -93,12 +91,19 @@ void deroute(int numSignal){
   switch(numSignal){
     case SIGCHLD: CHECK(pidFilsFini = wait(&status), "Problem while waiting");
       if(WIFEXITED(status))
-        printf("Fin du fils [PID=%i] --> Exit avec [STATUS=%i]\n", getpid(), status);
+        printf("Fin du fils [PID=%i] --> Exit avec [STATUS=%i]\n", pidFilsFini, status);
       if(WTERMSIG(status))
-        printf("Fin du fils [PID=%i] --> SIGNAL avec [STATUS=%i]\n", getpid(), status);
+        printf("Fin du fils [PID=%i] --> SIGNAL avec [STATUS=%i]\n", pidFilsFini, status);
       break;
+      
+    case SIGUSR1:
+    	serverCanAccept = 1;
+    	break;
 
     case SIGALRM : 
+    	if(serverMode == LOBBY_STATE){
+    		kill(getppid(), SIGUSR1); //Si on est dans le lobby on signal au père qu'il peut créer une nouvelle partie
+    	}
       timer = 0;
       timerAnswer = 0;
       break;
@@ -110,15 +115,16 @@ void deroute(int numSignal){
 }
 
 /**
-	\fn void initSignaux(void)
+	\fn void initSignaux(int option)
+	\param option --> 0 pour flag à 0, SA_RESTART pour SA_RESTART
 	\brief Fonction permettant au processus en question de pouvoir bloquer
     et traiter les différents signaux
 	\return void
 */
-void initSignaux(void){
+void initSignaux(int option){
    struct sigaction newAct;
    newAct.sa_handler = deroute;
-   newAct.sa_flags = 0;
+   newAct.sa_flags = option;
    CHECK(sigemptyset(&newAct.sa_mask), "Erreur lors du nettoyage du mask");
    CHECK(sigaction(SIGUSR1, &newAct, NULL), "Erreur lors de la mise en place du déroutement de signal");
    CHECK(sigaction(SIGCHLD, &newAct, NULL), "Erreur lors de la mise en place du déroutement de signal");
@@ -212,7 +218,7 @@ void socketInit(int *s, int type, char * address, int flag){
   lin.l_linger = 0;
   setsockopt(*s, SOL_SOCKET, SO_LINGER, (const char *)&lin, sizeof(int));
   if (setsockopt(*s, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int)) < 0)
-    error("setsockopt(SO_REUSEADDR) failed");
+    printf("setsockopt(SO_REUSEADDR) failed\n");
   // Temp code ///////////
 
   if(address != NULL){
@@ -236,7 +242,7 @@ void socketInit(int *s, int type, char * address, int flag){
   \brief Fonction permettant d'accepter un client, de lui assigner un processus fils, et d'appeler une fonction pour traiter ses demandes. Inutilisable si la connexion est de type DGRAM.
   \return void
 */
-void waitForClient(socketInfo_t * sockInfo, int listenSocket, void (*f)(socketInfo_t *)){
+void waitForClient(socketInfo_t * sockInfo, int listenSocket, void (*f)(socketInfo_t *, int)){
   int cltLen = sizeof(sockInfo->clt);
   int sockNum;
   CHECK(sockInfo->s = accept(listenSocket, (struct sockaddr *) &(sockInfo->clt), &cltLen), "Erreur lors de la tentative de connexion");
